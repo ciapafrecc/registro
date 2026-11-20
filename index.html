@@ -1,0 +1,1253 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Registro presenze</title>
+<meta name="theme-color" content="#EEF1F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1322" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Presenze">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: una colonna stretta pensata per iPhone, una schermata alla volta.
+   Barra in alto con tasto casa, contenuti a pollice, azioni principali larghe come lo schermo. */
+:root{
+  --font-display:"Bricolage Grotesque","Avenir Next","Trebuchet MS",system-ui,sans-serif;
+  --font-body:"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+  --bg:#EEF1F6;
+  --surface:#FFFFFF;
+  --ink:#16203A;
+  --muted:#566178;
+  --line:#D9DFEA;
+  --accent:#2B4BD3;
+  --on-accent:#FFFFFF;
+  --on-accent-soft:rgba(255,255,255,.2);
+  --accent-soft:#E3E9FD;
+  --ring:rgba(43,75,211,.28);
+  --ok:#0E6B4D;
+  --ok-soft:#DCF2E9;
+  --no:#B3312F;
+  --no-soft:#FBE2E0;
+  --on-no:#FFFFFF;
+  --scrim:rgba(10,14,26,.5);
+  --shadow:0 1px 2px rgba(22,32,58,.06),0 8px 20px rgba(22,32,58,.06);
+  --g-bg:#FFFFFF;
+  --g-ink:#1F1F1F;
+  --g-line:#DADCE0;
+  --a-bg:#000000;
+  --a-ink:#FFFFFF;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1322;
+    --surface:#171E33;
+    --ink:#E9EDF8;
+    --muted:#9BA6C2;
+    --line:#2A3455;
+    --accent:#8AA0FF;
+    --on-accent:#0E1322;
+    --on-accent-soft:rgba(14,19,34,.16);
+    --accent-soft:#222C55;
+    --ring:rgba(138,160,255,.35);
+    --ok:#5ED6A8;
+    --ok-soft:#133A2F;
+    --no:#FF8F8A;
+    --no-soft:#42201F;
+    --on-no:#2A0E0E;
+    --scrim:rgba(0,0,0,.6);
+    --shadow:none;
+    --g-bg:#131314;
+    --g-ink:#E3E3E3;
+    --g-line:#8E918F;
+    --a-bg:#FFFFFF;
+    --a-ink:#000000;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1322;
+  --surface:#171E33;
+  --ink:#E9EDF8;
+  --muted:#9BA6C2;
+  --line:#2A3455;
+  --accent:#8AA0FF;
+  --on-accent:#0E1322;
+  --on-accent-soft:rgba(14,19,34,.16);
+  --accent-soft:#222C55;
+  --ring:rgba(138,160,255,.35);
+  --ok:#5ED6A8;
+  --ok-soft:#133A2F;
+  --no:#FF8F8A;
+  --no-soft:#42201F;
+  --on-no:#2A0E0E;
+  --scrim:rgba(0,0,0,.6);
+  --shadow:none;
+  --g-bg:#131314;
+  --g-ink:#E3E3E3;
+  --g-line:#8E918F;
+  --a-bg:#FFFFFF;
+  --a-ink:#000000;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{
+  -webkit-text-size-adjust:100%;
+  background:var(--bg);
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  scroll-padding-top:env(safe-area-inset-top,0px);
+}
+[hidden]:not([hidden=until-found i]){display:none!important}
+img{max-width:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font:400 16px/1.45 var(--font-body);
+  padding-block:0 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-tap-highlight-color:transparent;
+}
+body::before{
+  content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);
+  background:var(--bg);z-index:10;
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+#app{max-width:560px;margin:0 auto}
+
+/* Intestazione delle schermate interne */
+.bar{
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:9;
+  display:flex;align-items:center;gap:14px;
+  padding:12px 0;background:var(--bg);
+}
+.icon-btn{
+  flex:none;width:48px;height:48px;border-radius:14px;
+  border:1.5px solid var(--line);background:var(--surface);color:var(--accent);
+  display:grid;place-items:center;
+}
+.icon-btn:active{transform:scale(.96)}
+.bar-text{min-width:0}
+.kicker{font:600 13px/1.3 var(--font-body);color:var(--muted)}
+.bar-title{font:700 24px/1.1 var(--font-display);letter-spacing:-.01em;margin:2px 0 0;overflow-wrap:anywhere;text-wrap:balance}
+
+/* Home */
+.hero{padding:28px 0 22px}
+.eyebrow{margin:0;font:600 14px/1.3 var(--font-body);color:var(--muted);font-variant-numeric:tabular-nums}
+.hero-title{margin:6px 0 0;font:700 clamp(36px,10vw,46px)/1 var(--font-display);letter-spacing:-.025em}
+.hero-title.small{font-size:clamp(28px,8vw,34px);line-height:1.08}
+.stack{display:flex;flex-direction:column;gap:14px}
+.tile{
+  display:flex;align-items:center;gap:16px;width:100%;text-align:left;
+  min-height:108px;padding:18px;border-radius:22px;
+  border:1.5px solid var(--line);background:var(--surface);color:var(--ink);
+  box-shadow:var(--shadow);transition:transform .12s;
+}
+.tile:active{transform:scale(.985)}
+.tile--primary{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.tile--row{min-height:72px;padding:14px 18px;border-radius:18px;box-shadow:none}
+.tile-ico{
+  flex:none;width:58px;height:58px;border-radius:17px;display:grid;place-items:center;
+  background:var(--accent-soft);color:var(--accent);
+}
+.tile--row .tile-ico{width:42px;height:42px;border-radius:13px}
+.tile--primary .tile-ico{background:var(--on-accent-soft);color:var(--on-accent)}
+.tile-text{flex:1;min-width:0}
+.tile-title{display:block;font:700 22px/1.15 var(--font-display);letter-spacing:-.01em}
+.tile--row .tile-title{font-size:18px}
+.tile-sub{display:block;margin-top:4px;font:400 14.5px/1.35 var(--font-body);color:var(--muted)}
+.tile--primary .tile-sub{color:inherit;opacity:.88}
+.tile-chev{flex:none;opacity:.55}
+
+/* Contenuti comuni */
+.screen{padding-top:6px}
+.h2{margin:30px 0 10px;font:700 12.5px/1.2 var(--font-body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.lead{margin:0 0 16px;font:500 17px/1.4 var(--font-body)}
+.note{margin:0 0 16px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);font:500 15px/1.4 var(--font-body)}
+.msg{min-height:22px;margin:14px 0 10px;font:500 14.5px/1.4 var(--font-body);color:var(--muted)}
+.msg.err{color:var(--no)}
+.msg.good{color:var(--ok)}
+.field{display:flex;flex-direction:column;gap:8px}
+.field+.field{margin-top:14px}
+.label{font:600 14px/1.3 var(--font-body);color:var(--muted)}
+.input{
+  appearance:none;-webkit-appearance:none;width:100%;min-height:56px;padding:0 16px;
+  font:500 17px/1.2 var(--font-body);color:var(--ink);background:var(--surface);
+  border:1.5px solid var(--line);border-radius:14px;
+}
+.input::placeholder{color:var(--muted);opacity:.8}
+.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)}
+
+.btn{
+  appearance:none;-webkit-appearance:none;border:0;min-height:54px;padding:0 22px;border-radius:15px;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  font:600 16.5px/1 var(--font-body);transition:transform .12s;
+}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-quiet{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn-danger{background:var(--no);color:var(--on-no)}
+.btn-block{width:100%}
+.btn[disabled]{opacity:.6;cursor:default}
+.btn-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.link-btn{
+  appearance:none;border:0;background:none;padding:10px 4px;min-height:44px;
+  font:600 15px/1.2 var(--font-body);color:var(--accent);text-decoration:underline;text-underline-offset:3px;
+}
+.link-btn.danger{color:var(--no)}
+
+/* Accesso */
+.pw{position:relative}
+.pw .input{padding-right:104px}
+.pw-btn{
+  appearance:none;-webkit-appearance:none;position:absolute;right:6px;top:6px;height:44px;padding:0 12px;border:0;border-radius:10px;
+  background:none;color:var(--accent);font:600 14.5px/1 var(--font-body);
+}
+.pw-btn:active{background:var(--accent-soft)}
+.switch{margin-top:12px;text-align:center;color:var(--muted);font:400 15px/1.4 var(--font-body)}
+.switch .link-btn{padding:10px 4px}
+.sep{display:flex;align-items:center;gap:12px;margin:22px 0 14px;color:var(--muted);font:600 13px/1 var(--font-body)}
+.sep::before,.sep::after{content:"";flex:1;height:1px;background:var(--line)}
+.social{display:flex;flex-direction:column;gap:10px}
+.btn-google{background:var(--g-bg);color:var(--g-ink);box-shadow:inset 0 0 0 1.5px var(--g-line)}
+.btn-apple{background:var(--a-bg);color:var(--a-ink)}
+
+/* Elenchi a righe, come le righe di un registro */
+.list{list-style:none;margin:0;padding:0;background:var(--surface);border:1.5px solid var(--line);border-radius:18px;overflow:hidden}
+.list>li+li{border-top:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:58px}
+.row--btn{width:100%;text-align:left;background:none;border:0}
+.row--btn:active{background:var(--accent-soft)}
+.num{flex:none;width:26px;text-align:right;font:500 13px/1 var(--font-body);color:var(--muted);font-variant-numeric:tabular-nums}
+.who{flex:1;min-width:0;font:600 16.5px/1.3 var(--font-body);overflow-wrap:anywhere}
+.who small{display:block;margin-top:2px;font:400 14px/1.3 var(--font-body);color:var(--muted)}
+.x-btn{
+  flex:none;width:44px;height:44px;border-radius:12px;border:0;background:none;color:var(--muted);
+  display:grid;place-items:center;
+}
+.x-btn:active{background:var(--no-soft);color:var(--no)}
+.empty{padding:26px 20px;text-align:center;border:1.5px dashed var(--line);border-radius:18px;color:var(--muted)}
+.empty strong{display:block;margin-bottom:4px;font:700 18px/1.25 var(--font-display);color:var(--ink)}
+.empty p{margin:0 0 14px;font:400 15px/1.45 var(--font-body)}
+.empty .btn{min-height:50px}
+
+/* Appello */
+.tally{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px}
+.chip{
+  display:inline-flex;align-items:baseline;gap:7px;padding:9px 14px;border-radius:999px;
+  background:var(--surface);border:1.5px solid var(--line);font:600 14px/1 var(--font-body);
+}
+.chip b{font:700 19px/1 var(--font-display);font-variant-numeric:tabular-nums}
+.chip--ok{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+.chip--no{background:var(--no-soft);border-color:transparent;color:var(--no)}
+.tools{display:flex;justify-content:flex-end;margin:0 0 6px}
+.call-row{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:8px 12px;padding:10px 12px 10px 14px}
+.call-row.missing{box-shadow:inset 0 0 0 2.5px var(--no)}
+.seg{display:flex;gap:6px}
+.seg button{
+  appearance:none;-webkit-appearance:none;min-width:82px;min-height:46px;padding:0 10px;border-radius:12px;
+  border:1.5px solid var(--line);background:var(--surface);color:var(--muted);
+  font:600 14.5px/1 var(--font-body);
+}
+.seg button:active{transform:scale(.97)}
+.seg .on-ok[aria-pressed="true"]{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.seg .on-no[aria-pressed="true"]{background:var(--no-soft);border-color:var(--no);color:var(--no)}
+@media (max-width:380px){
+  .call-row{grid-template-columns:26px 1fr}
+  .call-row .seg{grid-column:2}
+  .call-row .seg button{flex:1}
+}
+
+/* Esito e storico */
+.done{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:8px 0 4px}
+.done-ico{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:var(--ok-soft);color:var(--ok);margin-bottom:10px}
+.done h2{margin:0;font:700 32px/1.05 var(--font-display);letter-spacing:-.02em}
+.done p{margin:0;color:var(--muted);font:500 16px/1.4 var(--font-body)}
+.names{margin:6px 0 0;font:400 15.5px/1.5 var(--font-body);overflow-wrap:anywhere}
+.stack-s{display:flex;flex-direction:column;gap:10px}
+.rec{background:var(--surface);border:1.5px solid var(--line);border-radius:18px;overflow:hidden}
+.rec summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 16px;min-height:64px;cursor:pointer}
+.rec summary::-webkit-details-marker{display:none}
+.rec .chev{flex:none;opacity:.55;transition:transform .15s}
+.rec[open] .chev{transform:rotate(90deg)}
+.rec-score{flex:none;font:700 20px/1 var(--font-display);font-variant-numeric:tabular-nums}
+.rec-score small{font:500 13px/1 var(--font-body);color:var(--muted)}
+.rec-body{padding:2px 16px 16px;border-top:1px solid var(--line)}
+.rec-body h3{margin:14px 0 0;font:700 12.5px/1.2 var(--font-body);letter-spacing:.07em;text-transform:uppercase}
+.rec-body h3.ok{color:var(--ok)}
+.rec-body h3.no{color:var(--no)}
+
+/* Finestra di conferma e avvisi */
+.scrim{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;background:var(--scrim)}
+.sheet{
+  width:100%;max-width:560px;background:var(--surface);color:var(--ink);border-radius:24px 24px 0 0;
+  padding:24px max(20px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));
+}
+.sheet h2{margin:0 0 6px;font:700 22px/1.2 var(--font-display);overflow-wrap:anywhere}
+.sheet p{margin:0 0 18px;color:var(--muted);font:400 15.5px/1.45 var(--font-body)}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toast{
+  position:fixed;z-index:50;left:0;right:0;bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  display:flex;justify-content:center;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));
+  pointer-events:none;
+}
+.toast[hidden]{display:none}
+.toast span{max-width:520px;padding:12px 16px;border-radius:14px;background:var(--ink);color:var(--bg);font:500 14.5px/1.4 var(--font-body);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.loading{padding:90px 0;text-align:center;color:var(--muted);font:500 16px/1.4 var(--font-body)}
+
+/* Stato dell'account e backup */
+.status{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;min-height:62px;padding:12px 14px;
+  border-radius:16px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);
+}
+.status .dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--ok)}
+.status-text{flex:1;min-width:0;font:600 15px/1.3 var(--font-body)}
+.status-text small{display:block;margin-top:2px;font:400 13.5px/1.4 var(--font-body);color:var(--muted);overflow-wrap:anywhere}
+.status--warn{background:var(--no-soft);border-color:transparent;margin-bottom:14px}
+.status--warn .dot{background:var(--no)}
+.status--warn small{color:var(--ink);opacity:.85}
+.sub{margin:0 0 6px;color:var(--muted);font:400 15px/1.5 var(--font-body);overflow-wrap:anywhere}
+.panel{background:var(--surface);border:1.5px solid var(--line);border-radius:18px;padding:16px}
+.panel>p{margin:0 0 12px;font:400 15px/1.5 var(--font-body)}
+.textarea{min-height:112px;padding:12px 14px;resize:vertical;line-height:1.4}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);border:0;opacity:0}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<div id="app" aria-live="polite"></div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden><span></span></div>
+<noscript><p style="padding:40px 16px;text-align:center">Per usare il Registro presenze serve attivare JavaScript nel browser.</p></noscript>
+
+<!-- Librerie Firebase (accesso e database online) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+/* ==================================================================
+   CONFIGURAZIONE  —  incolla qui i dati del tuo progetto Firebase
+   (vedi README.md, passo A5: "firebaseConfig").
+   Finché restano i segnaposto "INCOLLA_QUI" il sito funziona solo
+   in locale, senza accesso e senza salvataggio online.
+   ================================================================== */
+var FIREBASE_CONFIG = {
+  apiKey: "INCOLLA_QUI",
+  authDomain: "INCOLLA_QUI",
+  projectId: "INCOLLA_QUI",
+  storageBucket: "INCOLLA_QUI",
+  messagingSenderId: "INCOLLA_QUI",
+  appId: "INCOLLA_QUI"
+};
+
+/* Metodi di accesso in più (oltre a email e password).
+   google: true  -> mostra "Continua con Google" (prima fai il passo G della guida).
+   apple:  false -> metti true SOLO dopo aver fatto il passo H (serve l'Apple Developer Program). */
+var ACCESSO_EXTRA = { google: true, apple: false };
+</script>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- utilità ---------- */
+var app = document.getElementById('app');
+var toastEl = document.getElementById('toast');
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function clean(s){ return String(s || '').replace(/\s+/g,' ').trim(); }
+function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+function plural(n, one, many){ return n === 1 ? '1 ' + one : n + ' ' + many; }
+function clone(x){ return JSON.parse(JSON.stringify(x)); }
+
+var fmtDay = new Intl.DateTimeFormat('it-IT', { weekday:'long', day:'numeric', month:'long' });
+var fmtDayShort = new Intl.DateTimeFormat('it-IT', { weekday:'short', day:'numeric', month:'short' });
+var fmtTime = new Intl.DateTimeFormat('it-IT', { hour:'2-digit', minute:'2-digit' });
+function stamp(iso){ var d = new Date(iso); return fmtDayShort.format(d) + ' · ' + fmtTime.format(d); }
+
+function svg(inner, size){
+  var s = size || 24;
+  return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
+}
+var ICON = {
+  house: svg('<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M10 20v-5.5h4V20"/>'),
+  userPlus: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M19 6.5v6M16 9.5h6"/>', 28),
+  clipboard: svg('<rect x="5" y="4.5" width="14" height="16.5" rx="2.5"/><path d="M9 3.5h6v3H9z"/><path d="m8.8 13.8 2.4 2.4 4.2-4.7"/>', 28),
+  book: svg('<path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v15H6.5A1.5 1.5 0 0 0 5 20.5z"/><path d="M5 5.5v15"/><path d="M9 8h6"/>', 22),
+  chev: svg('<path d="m9 5 7 7-7 7"/>', 22),
+  x: svg('<path d="M6 6l12 12M18 6 6 18"/>', 20),
+  check: svg('<path d="m5 12.5 4.5 4.5L19 7.5"/>', 38)
+};
+
+var LOGO_GOOGLE = '<svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
+var LOGO_APPLE = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>';
+
+/* ---------- configurazione e stato ---------- */
+function isConfigured(c){
+  return !!c && ['apiKey','projectId'].every(function(k){ return c[k] && String(c[k]).indexOf('INCOLLA') === -1; });
+}
+var CONFIGURED = isConfigured(window.FIREBASE_CONFIG);
+
+var LS_KEY = 'registro-presenze-v1';          // usato solo se Firebase non è configurato
+var state = { groups: [], records: [] };
+var store = null;                              // null = nessuna sessione attiva
+var ready = false;
+var acct = { name: '' };
+var auth = null, db = null, persistOk = false, sessionUid = null, retryFn = null;
+
+/* ---------- salvataggio: solo su questo dispositivo ---------- */
+function readLocal(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      var d = JSON.parse(raw);
+      return { groups: Array.isArray(d.groups) ? d.groups : [], records: Array.isArray(d.records) ? d.records : [] };
+    }
+  }catch(e){}
+  return { groups: [], records: [] };
+}
+function writeLocal(){
+  localStorage.setItem(LS_KEY, JSON.stringify({ groups: state.groups, records: state.records }));
+}
+var localStore = {
+  mode: 'local',
+  load: function(){ return Promise.resolve(readLocal()); },
+  saveGroups: function(){ writeLocal(); return Promise.resolve('ok'); },
+  saveRecord: function(){ writeLocal(); return Promise.resolve('ok'); }
+};
+
+/* ---------- salvataggio: online (Firebase) ---------- */
+/* Attende la conferma del server. Se la connessione è lenta o assente e la memoria
+   del dispositivo è attiva, la modifica resta in coda e parte da sola appena torna internet. */
+function ack(promise){
+  return new Promise(function(resolve, reject){
+    var done = false;
+    var t = setTimeout(function(){
+      if(done) return; done = true;
+      if(persistOk){ resolve('queued'); } else { reject(new Error('timeout')); }
+    }, 5000);
+    promise.then(function(){
+      if(done) return; done = true; clearTimeout(t); resolve('ok');
+    }, function(err){
+      if(done) return; done = true; clearTimeout(t); reject(err);
+    });
+  });
+}
+function makeCloud(userId){
+  var userDoc = db.collection('utenti').doc(userId);
+  var recs = userDoc.collection('appelli');
+  return {
+    mode: 'cloud',
+    load: function(){
+      return Promise.all([ userDoc.get(), recs.orderBy('at','desc').limit(500).get() ]).then(function(res){
+        var gd = res[0].exists ? res[0].data() : null;
+        var groups = gd && Array.isArray(gd.groups) ? clone(gd.groups) : [];
+        var records = res[1].docs.map(function(d){ return clone(d.data()); });
+        return { groups: groups, records: records };
+      });
+    },
+    saveGroups: function(groups){ return ack(userDoc.set({ groups: groups })); },
+    saveRecord: function(rec){ return ack(recs.doc(rec.id).set(rec)); }
+  };
+}
+var QUEUED_MSG = 'Salvato sul dispositivo: si sincronizzerà online appena c’è connessione.';
+
+var saving = false, again = false;
+function flushGroups(){
+  if(saving){ again = true; return; }
+  saving = true;
+  (function loop(){
+    again = false;
+    var p;
+    try{ p = Promise.resolve(store.saveGroups(state.groups)); }catch(e){ p = Promise.reject(e); }
+    p.then(function(res){
+      if(res === 'queued') toast(QUEUED_MSG);
+      if(again){ loop(); } else { saving = false; }
+    }, function(){
+      saving = false;
+      toast('Non sono riuscito a salvare le modifiche. Riprova tra poco.');
+    });
+  })();
+}
+
+/* ---------- avvisi e conferme ---------- */
+var toastTimer = null;
+function toast(msg){
+  toastEl.firstElementChild.textContent = msg;
+  toastEl.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toastEl.hidden = true; }, 4200);
+}
+var sheetEl = null;
+function closeSheet(){ if(sheetEl){ sheetEl.remove(); sheetEl = null; } }
+function askConfirm(o){
+  closeSheet();
+  var el = document.createElement('div');
+  el.className = 'scrim';
+  el.innerHTML = '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetT">' +
+    '<h2 id="sheetT">' + esc(o.title) + '</h2><p>' + esc(o.text) + '</p>' +
+    '<div class="sheet-actions"><button type="button" class="btn btn-quiet" data-s="no">Annulla</button>' +
+    '<button type="button" class="btn ' + (o.danger ? 'btn-danger' : 'btn-primary') + '" data-s="yes">' + esc(o.yes) + '</button></div></div>';
+  el.addEventListener('click', function(e){
+    var b = e.target.closest('[data-s]');
+    if(b && b.dataset.s === 'yes'){ closeSheet(); o.onYes(); }
+    else if((b && b.dataset.s === 'no') || e.target === el){ closeSheet(); }
+  });
+  document.body.appendChild(el);
+  sheetEl = el;
+  el.querySelector('[data-s="no"]').focus();
+}
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeSheet(); });
+
+/* ---------- navigazione ---------- */
+var cur = { view:'home', groupId:null, marks:null, flash:'', last:null, authMode:'login', authEmail:'', error:null };
+var VIEWS = {};
+var OPEN_VIEWS = { accesso:1, errore:1 };      // schermate raggiungibili solo dal codice, non dal tasto indietro
+function findGroup(){
+  for(var i = 0; i < state.groups.length; i++){ if(state.groups[i].id === cur.groupId) return state.groups[i]; }
+  return null;
+}
+function setHash(view, replace){
+  try{
+    if(location.hash === '#' + view) return;
+    if(replace && history.replaceState){ history.replaceState(null, '', '#' + view); }
+    else { location.hash = view; }
+  }catch(e){}
+}
+function go(view, replace){
+  cur.view = view;
+  setHash(view, replace);
+  paint();
+}
+function paint(){
+  closeSheet();
+  VIEWS[cur.view]();
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', function(){
+  if(!ready || !store) return;
+  var v = (location.hash || '').slice(1);
+  if(!VIEWS[v] || v === cur.view || OPEN_VIEWS[v]) return;
+  cur.view = v;
+  paint();
+});
+function leaveTo(view){
+  if(cur.view === 'appello' && cur.marks && Object.keys(cur.marks).length){
+    askConfirm({ title:'Uscire dall’appello?', text:'Le presenze che hai segnato non sono ancora salvate.', yes:'Esci senza salvare', danger:true, onYes:function(){ go(view); } });
+    return;
+  }
+  go(view);
+}
+function header(kicker, title){
+  return '<header class="bar"><button class="icon-btn" type="button" data-act="home" aria-label="Torna alla home">' + ICON.house + '</button>' +
+    '<div class="bar-text">' + (kicker ? '<div class="kicker">' + esc(kicker) + '</div>' : '') + '<h1 class="bar-title">' + esc(title) + '</h1></div></header>';
+}
+function showLoading(text){
+  app.innerHTML = '<div class="loading" role="status">' + esc(text) + '</div>';
+}
+
+/* ---------- accesso ---------- */
+function authError(e, kind){
+  var c = e && e.code ? String(e.code) : '';
+  if(kind){
+    var nm = kind === 'apple' ? 'Apple' : 'Google', step = kind === 'apple' ? 'H' : 'G';
+    if(c === 'auth/operation-not-allowed' || c === 'auth/configuration-not-found'){
+      return 'L’accesso con ' + nm + ' non è attivo nel progetto Firebase (vedi la guida, passo ' + step + ').';
+    }
+    if(c === 'auth/invalid-credential' || c === 'auth/internal-error' || c === 'auth/invalid-oauth-client-id' || c === 'auth/invalid-oauth-provider'){
+      return 'Accesso con ' + nm + ' non riuscito. Controlla la configurazione nella guida (passo ' + step + ').';
+    }
+  }
+  var map = {
+    'auth/invalid-email': 'Controlla l’email: non sembra scritta correttamente.',
+    'auth/missing-email': 'Scrivi la tua email.',
+    'auth/invalid-credential': 'Email o password non corretti.',
+    'auth/invalid-login-credentials': 'Email o password non corretti.',
+    'auth/wrong-password': 'Email o password non corretti.',
+    'auth/user-not-found': 'Email o password non corretti.',
+    'auth/email-already-in-use': 'Esiste già un account con questa email. Prova ad accedere.',
+    'auth/weak-password': 'Password troppo debole: usa almeno 6 caratteri.',
+    'auth/too-many-requests': 'Troppi tentativi. Aspetta qualche minuto e riprova.',
+    'auth/network-request-failed': 'Nessuna connessione. Controlla internet e riprova.',
+    'auth/user-disabled': 'Questo account è stato disattivato.',
+    'auth/operation-not-allowed': 'L’accesso con email e password non è attivo nel progetto Firebase (vedi la guida, passo A2).',
+    'auth/configuration-not-found': 'L’accesso non è attivo nel progetto Firebase (vedi la guida, passo A2).',
+    'auth/invalid-api-key': 'I dati di Firebase in index.html non sono corretti (vedi la guida, passo B).',
+    'auth/api-key-not-valid': 'I dati di Firebase in index.html non sono corretti (vedi la guida, passo B).',
+    'auth/unauthorized-domain': 'Questo indirizzo non è autorizzato in Firebase (vedi la guida, passo D).',
+    'auth/popup-blocked': 'Il browser ha bloccato la finestra di accesso. Consenti le finestre per questo sito, aprilo in Safari oppure usa email e password.',
+    'auth/operation-not-supported-in-this-environment': 'Da qui non riesco ad aprire la finestra di accesso. Apri il sito in Safari oppure usa email e password.',
+    'auth/web-storage-unsupported': 'Il browser blocca la memoria necessaria per accedere. Esci dalla navigazione privata o usa Safari.'
+  };
+  return map[c] || 'Non sono riuscito a completare l’operazione. Riprova.';
+}
+function socialHtml(){
+  var x = window.ACCESSO_EXTRA || {};
+  var g = x.google === true, a = x.apple === true;
+  if(!g && !a) return '';
+  return '<div class="sep" role="separator">oppure</div><div class="social">' +
+    (g ? '<button class="btn btn-google btn-block" type="button" data-act="social" data-v="google">' + LOGO_GOOGLE + 'Continua con Google</button>' : '') +
+    (a ? '<button class="btn btn-apple btn-block" type="button" data-act="social" data-v="apple">' + LOGO_APPLE + 'Continua con Apple</button>' : '') +
+    '</div>';
+}
+VIEWS.accesso = function(){
+  var signup = cur.authMode === 'signup';
+  app.innerHTML =
+    '<div class="hero"><p class="eyebrow">' + esc(fmtDay.format(new Date())) + '</p><h1 class="hero-title">Registro presenze</h1></div>' +
+    '<div class="screen"><p class="lead">' + (signup ? 'Crea il tuo account per salvare gruppi e appelli online.' : 'Accedi per ritrovare i tuoi gruppi e i tuoi appelli.') + '</p>' +
+    '<form id="formAuth" novalidate>' +
+    '<div class="field"><label class="label" for="authEmail">Email</label>' +
+    '<input class="input" id="authEmail" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="nome@esempio.it"></div>' +
+    '<div class="field"><label class="label" for="authPass">Password</label>' +
+    '<div class="pw"><input class="input" id="authPass" name="password" type="password" autocomplete="' + (signup ? 'new-password' : 'current-password') + '" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="' + (signup ? 'Almeno 6 caratteri' : 'La tua password') + '">' +
+    '<button class="pw-btn" type="button" data-act="toggle-pw" aria-pressed="false">Mostra</button></div></div>' +
+    '<p class="msg" id="authMsg" role="status"></p>' +
+    '<button class="btn btn-primary btn-block" id="btnAuth" type="submit">' + (signup ? 'Crea account' : 'Accedi') + '</button></form>' + socialHtml() +
+    '<div class="switch">' + (signup
+      ? '<span>Hai già un account?</span> <button class="link-btn" type="button" data-act="auth-mode" data-v="login">Accedi</button>'
+      : '<span>Prima volta qui?</span> <button class="link-btn" type="button" data-act="auth-mode" data-v="signup">Crea un account</button>') + '</div>' +
+    (signup ? '' : '<div class="switch"><button class="link-btn" type="button" data-act="auth-forgot">Password dimenticata?</button></div>') +
+    '</div>';
+  document.getElementById('authEmail').value = cur.authEmail || '';
+};
+function authNote(text, isErr){
+  var m = document.getElementById('authMsg');
+  if(m){ m.className = 'msg ' + (isErr ? 'err' : 'good'); m.textContent = text; }
+}
+function submitAuth(rawEmail, pass){
+  var email = clean(rawEmail);
+  var signup = cur.authMode === 'signup';
+  cur.authEmail = email;
+  if(!email){ authNote('Scrivi la tua email.', true); document.getElementById('authEmail').focus(); return; }
+  if(!pass){ authNote('Scrivi la password.', true); document.getElementById('authPass').focus(); return; }
+  if(signup && pass.length < 6){ authNote('La password deve avere almeno 6 caratteri.', true); document.getElementById('authPass').focus(); return; }
+  var btn = document.getElementById('btnAuth');
+  btn.disabled = true; btn.textContent = signup ? 'Creo l’account…' : 'Accedo…';
+  authNote('', false);
+  var p;
+  try{
+    p = signup ? auth.createUserWithEmailAndPassword(email, pass) : auth.signInWithEmailAndPassword(email, pass);
+  }catch(e){ p = Promise.reject(e); }
+  p.then(function(){
+    /* il resto lo fa onAuthStateChanged */
+  }, function(e){
+    var b = document.getElementById('btnAuth');
+    if(b){ b.disabled = false; b.textContent = signup ? 'Crea account' : 'Accedi'; }
+    authNote(authError(e), true);
+  });
+}
+function forgotPassword(){
+  var email = clean(document.getElementById('authEmail').value);
+  cur.authEmail = email;
+  if(!email){ authNote('Scrivi qui sopra la tua email, poi tocca di nuovo “Password dimenticata?”.', true); document.getElementById('authEmail').focus(); return; }
+  authNote('Invio il messaggio…', false);
+  var p;
+  try{ p = auth.sendPasswordResetEmail(email); }catch(e){ p = Promise.reject(e); }
+  p.then(function(){
+    authNote('Se esiste un account con questa email, riceverai un messaggio per scegliere una nuova password. Controlla anche lo spam.', false);
+  }, function(e){
+    if(e && e.code === 'auth/user-not-found'){
+      authNote('Se esiste un account con questa email, riceverai un messaggio per scegliere una nuova password. Controlla anche lo spam.', false);
+    } else { authNote(authError(e), true); }
+  });
+}
+/* Accesso con Google / Apple (finestra di accesso del provider) */
+var pendingLink = null;   // metodo da collegare dopo che l'utente ha provato ad entrare con un account già esistente
+function socialLogin(kind){
+  if(!auth) return;
+  var provider;
+  try{
+    if(kind === 'apple'){
+      provider = new firebase.auth.OAuthProvider('apple.com');
+      provider.addScope('email'); provider.addScope('name');
+    } else {
+      provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt:'select_account' });
+    }
+  }catch(e){ authNote(authError(e, kind), true); return; }
+  authNote(kind === 'apple' ? 'Apro la finestra di Apple…' : 'Apro la finestra di Google…', false);
+  var p;
+  try{ p = auth.signInWithPopup(provider); }catch(e){ p = Promise.reject(e); }
+  p.then(function(){
+    /* il resto lo fa onAuthStateChanged */
+  }, function(e){
+    var c = e && e.code;
+    if(c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request'){ authNote('', false); return; }
+    if(c === 'auth/account-exists-with-different-credential'){
+      var mail = (e.customData && e.customData.email) || e.email || '';
+      pendingLink = e.credential ? { email: mail, credential: e.credential } : null;
+      cur.authMode = 'login'; cur.authEmail = mail; paint();
+      authNote('Esiste già un account con questa email, creato in un altro modo. Entra qui sotto con quello (email e password, Google o Apple): poi collego anche questo metodo.', true);
+      return;
+    }
+    authNote(authError(e, kind), true);
+  });
+}
+function doLogout(){
+  var p;
+  try{ p = Promise.resolve(auth.signOut()); }catch(e){ p = Promise.reject(e); }
+  p.then(null, function(){ toast('Non sono riuscito a uscire. Riprova.'); });
+}
+function askLogout(){
+  Promise.race([
+    Promise.resolve(db.waitForPendingWrites()).then(function(){ return true; }),
+    sleep(1500).then(function(){ return false; })
+  ]).catch(function(){ return true; }).then(function(synced){
+    askConfirm({
+      title:'Uscire dall’account?',
+      text: synced
+        ? 'I tuoi dati restano salvati online. Per ritrovarli ti servono email e password.'
+        : 'Alcune modifiche non sono ancora arrivate online (forse sei senza connessione). Se esci adesso potresti perderle.',
+      yes: synced ? 'Esci' : 'Esci comunque', danger:true, onYes:doLogout
+    });
+  });
+}
+
+/* ---------- sessione ---------- */
+function startSession(user){
+  acct.name = user.displayName || user.email || '';
+  var cloud = makeCloud(user.uid);
+  var attempt = function(){
+    showLoading('Carico i tuoi dati…');
+    Promise.race([ cloud.load(), sleep(15000).then(function(){ throw { code:'timeout' }; }) ]).then(function(data){
+      if(sessionUid !== user.uid) return;
+      store = cloud; state = data; ready = true;
+      go('home', true);
+    }, function(err){
+      if(sessionUid !== user.uid) return;
+      var denied = err && err.code === 'permission-denied';
+      cur.error = {
+        title: denied ? 'Il database non ha dato il permesso' : 'Non riesco a caricare i dati',
+        text: denied ? 'Le regole di Firestore non sono state pubblicate o non sono corrette. Controlla il passo A4 della guida.'
+                     : 'Controlla la connessione a internet e riprova. I dati che hai già salvato non si perdono.',
+        logout: true
+      };
+      retryFn = attempt;
+      go('errore', true);
+    });
+  };
+  attempt();
+}
+function endSession(){
+  sessionUid = null; store = null; retryFn = null;
+  state = { groups: [], records: [] };
+  acct = { name: '' };
+  cur.groupId = null; cur.marks = null; cur.last = null; cur.flash = ''; cur.authMode = 'login'; cur.error = null;
+  ready = true;
+  go('accesso', true);
+}
+function onUser(user){
+  if(user){
+    if(pendingLink){
+      var pl = pendingLink; pendingLink = null;
+      if(user.email && pl.email && user.email.toLowerCase() === pl.email.toLowerCase()){
+        user.linkWithCredential(pl.credential).then(function(){
+          toast('Nuovo metodo di accesso collegato al tuo account.');
+        }, function(){
+          toast('Non sono riuscito a collegare il nuovo metodo di accesso.');
+        });
+      }
+    }
+    if(sessionUid === user.uid) return;
+    sessionUid = user.uid;
+    startSession(user);
+  } else {
+    endSession();
+  }
+}
+VIEWS.errore = function(){
+  var e = cur.error || { title:'Qualcosa non va', text:'', logout:false };
+  app.innerHTML = '<div class="hero"><p class="eyebrow">Registro presenze</p><h1 class="hero-title small">' + esc(e.title) + '</h1></div>' +
+    '<div class="screen"><p class="lead">' + esc(e.text) + '</p><div class="stack-s">' +
+    '<button class="btn btn-primary btn-block" type="button" data-act="retry">Riprova</button>' +
+    (e.logout ? '<button class="btn btn-quiet btn-block" type="button" data-act="logout-now">Esci dall’account</button>' : '') +
+    '</div></div>';
+};
+
+/* ---------- home ---------- */
+function tile(act, icon, title, sub, primary){
+  return '<button class="tile' + (primary ? ' tile--primary' : '') + '" type="button" data-act="' + act + '">' +
+    '<span class="tile-ico">' + icon + '</span><span class="tile-text"><span class="tile-title">' + esc(title) + '</span><span class="tile-sub">' + esc(sub) + '</span></span>' +
+    '<span class="tile-chev">' + ICON.chev + '</span></button>';
+}
+VIEWS.home = function(){
+  var g = state.groups.length;
+  var p = state.groups.reduce(function(n, x){ return n + x.members.length; }, 0);
+  var r = state.records.length;
+  var addSub = g ? plural(g, 'gruppo', 'gruppi') + ' · ' + plural(p, 'persona', 'persone') : 'Crea un gruppo e inserisci i nomi';
+  var callSub = g ? 'Scegli il gruppo e segna chi c’è' : 'Prima crea un gruppo';
+  var tCall = tile('call', ICON.clipboard, 'Fai l’appello', callSub, g > 0);
+  var tAdd = tile('add', ICON.userPlus, 'Aggiungi persone', addSub, g === 0);
+  var tiles = g > 0 ? tCall + tAdd : tAdd + tCall;
+  var hist = '<button class="tile tile--row" type="button" data-act="history"><span class="tile-ico">' + ICON.book + '</span>' +
+    '<span class="tile-text"><span class="tile-title">Appelli salvati</span><span class="tile-sub">' + (r ? esc(plural(r, 'appello', 'appelli')) : 'Ancora nessun appello') + '</span></span>' +
+    '<span class="tile-chev">' + ICON.chev + '</span></button>';
+  var cloud = !!store && store.mode === 'cloud';
+  var st;
+  if(cloud){
+    st = '<button class="status" type="button" data-act="account"><span class="dot"></span><span class="status-text">Salvataggio online attivo<small>' +
+      esc(acct.name ? 'Collegato come ' + acct.name : 'Collegato al tuo account') + '</small></span><span class="tile-chev">' + ICON.chev + '</span></button>';
+  } else {
+    st = '<button class="status status--warn" type="button" data-act="account"><span class="dot"></span><span class="status-text">Dati solo su questo dispositivo<small>' +
+      'Accesso non attivo: i dati possono sparire se il browser li cancella. Tocca per i dettagli.' +
+      '</small></span><span class="tile-chev">' + ICON.chev + '</span></button>';
+  }
+  app.innerHTML = '<div class="hero"><p class="eyebrow">' + esc(fmtDay.format(new Date())) + '</p><h1 class="hero-title">Registro presenze</h1></div>' +
+    (cloud ? '' : st) + '<div class="stack">' + tiles + hist + '</div>' + (cloud ? '<div style="margin-top:22px">' + st + '</div>' : '');
+};
+
+/* ---------- nuovo gruppo ---------- */
+VIEWS['nuovo-gruppo'] = function(){
+  var existing = '';
+  if(state.groups.length){
+    existing = '<h2 class="h2">Oppure scegli un gruppo che hai già</h2><ul class="list">' + state.groups.map(function(g){
+      return '<li><button class="row row--btn" type="button" data-act="open-group" data-id="' + g.id + '"><span class="who">' + esc(g.name) +
+        '<small>' + esc(plural(g.members.length, 'persona', 'persone')) + '</small></span><span class="tile-chev">' + ICON.chev + '</span></button></li>';
+    }).join('') + '</ul>';
+  }
+  app.innerHTML = header('Aggiungi persone', 'Nuovo gruppo') +
+    '<div class="screen"><p class="lead">Prima di inserire i nomi, dai un nome al gruppo.</p>' +
+    '<form id="formGroup" novalidate><div class="field"><label class="label" for="groupName">Nome del gruppo</label>' +
+    '<input class="input" id="groupName" name="groupName" type="text" maxlength="60" autocomplete="off" autocapitalize="words" enterkeyhint="done" placeholder="Es. Classe 3B, Coro, Under 14"></div>' +
+    '<p class="msg" id="groupMsg" role="status"></p>' +
+    '<button class="btn btn-primary btn-block" type="submit">Crea gruppo</button></form>' + existing + '</div>';
+  var f = document.getElementById('groupName'); if(f) f.focus();
+};
+function createGroup(raw){
+  var name = clean(raw);
+  var msg = document.getElementById('groupMsg');
+  if(!name){ msg.className = 'msg err'; msg.textContent = 'Scrivi il nome del gruppo.'; return; }
+  var dup = state.groups.some(function(g){ return g.name.toLowerCase() === name.toLowerCase(); });
+  if(dup){ msg.className = 'msg err'; msg.textContent = 'Esiste già un gruppo con questo nome. Scegline un altro o apri quello esistente qui sotto.'; return; }
+  var g = { id: newId(), name: name, members: [] };
+  state.groups.push(g);
+  flushGroups();
+  cur.groupId = g.id;
+  cur.flash = 'Gruppo creato. Ora aggiungi le persone.';
+  go('membri');
+}
+
+/* ---------- membri ---------- */
+VIEWS.membri = function(){
+  var g = findGroup();
+  if(!g){ go('home'); return; }
+  var flash = cur.flash ? '<p class="note">' + esc(cur.flash) + '</p>' : '';
+  cur.flash = '';
+  app.innerHTML = header('Aggiungi persone a', g.name) +
+    '<div class="screen">' + flash +
+    '<form id="formMember" novalidate><div class="field"><label class="label" for="memberName">Nome del membro</label>' +
+    '<input class="input" id="memberName" name="memberName" type="text" maxlength="80" autocomplete="off" autocapitalize="words" enterkeyhint="send" placeholder="Nome e cognome"></div>' +
+    '<p class="msg" id="memberMsg" role="status"></p>' +
+    '<div class="btn-pair" style="margin-top:0"><button class="btn btn-quiet" type="button" data-act="cancel-name">Annulla</button>' +
+    '<button class="btn btn-primary" type="submit">Invia</button></div></form>' +
+    '<div id="memberList"></div>' +
+    '<div style="margin-top:26px;text-align:center"><button class="link-btn danger" type="button" data-act="delete-group">Elimina gruppo</button></div></div>';
+  paintMembers();
+  var f = document.getElementById('memberName'); if(f) f.focus();
+};
+function paintMembers(){
+  var g = findGroup(); var box = document.getElementById('memberList');
+  if(!g || !box) return;
+  if(!g.members.length){
+    box.innerHTML = '<h2 class="h2">Nel gruppo</h2><div class="empty"><strong>Ancora nessuna persona</strong><p>Scrivi un nome qui sopra e premi Invia.</p></div>';
+    return;
+  }
+  box.innerHTML = '<h2 class="h2">Nel gruppo · ' + g.members.length + '</h2><ul class="list">' + g.members.map(function(m, i){
+    return '<li class="row"><span class="num">' + (i + 1) + '</span><span class="who">' + esc(m.name) + '</span>' +
+      '<button class="x-btn" type="button" data-act="remove-member" data-id="' + m.id + '" aria-label="Rimuovi ' + esc(m.name) + '">' + ICON.x + '</button></li>';
+  }).join('') + '</ul>';
+}
+function addMember(raw){
+  var g = findGroup(); if(!g) return;
+  var name = clean(raw);
+  var msg = document.getElementById('memberMsg');
+  var input = document.getElementById('memberName');
+  if(!name){ msg.className = 'msg err'; msg.textContent = 'Scrivi un nome prima di premere Invia.'; input.focus(); return; }
+  var dup = g.members.some(function(m){ return m.name.toLowerCase() === name.toLowerCase(); });
+  if(dup){ msg.className = 'msg err'; msg.textContent = 'C’è già una persona con questo nome. Aggiungi il cognome o un’iniziale.'; input.focus(); return; }
+  g.members.push({ id: newId(), name: name });
+  flushGroups();
+  input.value = '';
+  msg.className = 'msg good';
+  msg.textContent = 'Aggiunto: ' + name;
+  paintMembers();
+  input.focus();
+}
+
+/* ---------- scelta del gruppo per l'appello ---------- */
+VIEWS['scegli-gruppo'] = function(){
+  var body;
+  if(!state.groups.length){
+    body = '<div class="empty"><strong>Non c’è ancora nessun gruppo</strong><p>Crea un gruppo e aggiungi le persone, poi potrai fare l’appello.</p>' +
+      '<button class="btn btn-primary" type="button" data-act="add">Crea il primo gruppo</button></div>';
+  } else {
+    body = '<ul class="list">' + state.groups.map(function(g){
+      return '<li><button class="row row--btn" type="button" data-act="start-call" data-id="' + g.id + '"><span class="who">' + esc(g.name) +
+        '<small>' + esc(g.members.length ? plural(g.members.length, 'persona', 'persone') : 'Nessuna persona') + '</small></span><span class="tile-chev">' + ICON.chev + '</span></button></li>';
+    }).join('') + '</ul>';
+  }
+  app.innerHTML = header('Appello', 'Quale gruppo?') + '<div class="screen"><p class="lead">Scegli il gruppo di cui fare l’appello.</p>' + body + '</div>';
+};
+function startCall(id){
+  cur.groupId = id;
+  var g = findGroup(); if(!g) return;
+  if(!g.members.length){
+    cur.flash = 'Aggiungi almeno una persona prima di fare l’appello.';
+    go('membri');
+    return;
+  }
+  cur.marks = {};
+  go('appello');
+}
+
+/* ---------- appello ---------- */
+VIEWS.appello = function(){
+  var g = findGroup();
+  if(!g || !cur.marks){ go('home'); return; }
+  app.innerHTML = header('Appello · ' + fmtDay.format(new Date()), g.name) +
+    '<div class="screen"><div class="tally" id="tally"></div>' +
+    '<div class="tools"><button class="link-btn" type="button" data-act="all-present">Segna tutti presenti</button></div>' +
+    '<ol class="list" id="callList">' + g.members.map(function(m, i){
+      return '<li class="row call-row" data-id="' + m.id + '"><span class="num">' + (i + 1) + '</span><span class="who">' + esc(m.name) + '</span>' +
+        '<div class="seg" role="group" aria-label="Presenza di ' + esc(m.name) + '">' +
+        '<button type="button" class="on-ok" data-act="mark" data-id="' + m.id + '" data-v="1" aria-pressed="false">Presente</button>' +
+        '<button type="button" class="on-no" data-act="mark" data-id="' + m.id + '" data-v="0" aria-pressed="false">Assente</button></div></li>';
+    }).join('') + '</ol>' +
+    '<p class="msg" id="callMsg" role="status"></p>' +
+    '<button class="btn btn-primary btn-block" id="btnConfirm" type="button" data-act="confirm-call">Conferma appello</button></div>';
+  paintCall();
+};
+function paintCall(){
+  var g = findGroup(); if(!g) return;
+  var yes = 0, no = 0;
+  g.members.forEach(function(m){
+    var v = cur.marks[m.id];
+    if(v === true) yes++; else if(v === false) no++;
+    var row = app.querySelector('.call-row[data-id="' + m.id + '"]');
+    if(!row) return;
+    var b = row.querySelectorAll('.seg button');
+    b[0].setAttribute('aria-pressed', v === true ? 'true' : 'false');
+    b[1].setAttribute('aria-pressed', v === false ? 'true' : 'false');
+    if(v !== undefined) row.classList.remove('missing');
+  });
+  var left = g.members.length - yes - no;
+  document.getElementById('tally').innerHTML =
+    '<span class="chip chip--ok"><b>' + yes + '</b> presenti</span>' +
+    '<span class="chip chip--no"><b>' + no + '</b> assenti</span>' +
+    '<span class="chip"><b>' + left + '</b> da segnare</span>';
+}
+function confirmCall(){
+  var g = findGroup(); if(!g || !cur.marks) return;
+  var msg = document.getElementById('callMsg');
+  var missing = g.members.filter(function(m){ return cur.marks[m.id] === undefined; });
+  if(missing.length){
+    msg.className = 'msg err';
+    msg.textContent = missing.length === 1 ? 'Manca 1 persona da segnare, evidenziata qui sopra.' : 'Mancano ' + missing.length + ' persone da segnare, evidenziate qui sopra.';
+    missing.forEach(function(m){
+      var row = app.querySelector('.call-row[data-id="' + m.id + '"]');
+      if(row) row.classList.add('missing');
+    });
+    var first = app.querySelector('.call-row.missing');
+    if(first) first.scrollIntoView({ block:'center', behavior:'smooth' });
+    return;
+  }
+  var rec = {
+    id: newId(),
+    groupId: g.id,
+    groupName: g.name,
+    at: new Date().toISOString(),
+    entries: g.members.map(function(m){ return { name: m.name, present: cur.marks[m.id] === true }; })
+  };
+  var btn = document.getElementById('btnConfirm');
+  btn.disabled = true; btn.textContent = 'Salvo…';
+  msg.className = 'msg'; msg.textContent = '';
+  state.records.unshift(rec);
+  var p;
+  try{ p = Promise.resolve(store.saveRecord(rec)); }catch(e){ p = Promise.reject(e); }
+  p.then(function(res){
+    cur.marks = null;
+    cur.last = rec;
+    go('fatto');
+    if(res === 'queued') toast(QUEUED_MSG);
+  }, function(){
+    state.records = state.records.filter(function(r){ return r.id !== rec.id; });
+    btn.disabled = false; btn.textContent = 'Conferma appello';
+    msg.className = 'msg err';
+    msg.textContent = store.mode === 'cloud'
+      ? 'Non sono riuscito a salvare l’appello. Controlla la connessione e riprova.'
+      : 'Questo browser non permette di salvare i dati. Riprova, oppure apri la pagina in Safari.';
+  });
+}
+
+/* ---------- esito ---------- */
+VIEWS.fatto = function(){
+  var r = cur.last;
+  if(!r){ go('home'); return; }
+  var yes = r.entries.filter(function(e){ return e.present; });
+  var no = r.entries.filter(function(e){ return !e.present; });
+  var absent = no.length ? '<h2 class="h2">Assenti</h2><p class="names">' + esc(no.map(function(e){ return e.name; }).join(', ')) + '</p>' : '<p class="msg good" style="margin-top:18px">Nessuna assenza.</p>';
+  app.innerHTML = header('', 'Appello') +
+    '<div class="screen"><div class="done"><span class="done-ico">' + ICON.check + '</span><h2>Appello salvato</h2><p>' + esc(r.groupName) + ' · ' + esc(stamp(r.at)) + '</p></div>' +
+    '<div class="tally" style="margin-top:18px"><span class="chip chip--ok"><b>' + yes.length + '</b> presenti</span><span class="chip chip--no"><b>' + no.length + '</b> assenti</span></div>' +
+    absent +
+    '<div class="stack-s" style="margin-top:28px"><button class="btn btn-primary btn-block" type="button" data-act="home">' + ICON.house + ' Torna alla home</button>' +
+    '<button class="btn btn-quiet btn-block" type="button" data-act="history">Vedi appelli salvati</button></div></div>';
+};
+
+/* ---------- storico ---------- */
+VIEWS.storico = function(){
+  var body;
+  if(!state.records.length){
+    body = '<div class="empty"><strong>Nessun appello salvato</strong><p>Quando confermi un appello lo ritrovi qui, con presenti e assenti.</p>' +
+      '<button class="btn btn-primary" type="button" data-act="call">Fai un appello</button></div>';
+  } else {
+    body = '<div class="stack-s">' + state.records.map(function(r){
+      var yes = r.entries.filter(function(e){ return e.present; }).map(function(e){ return e.name; });
+      var no = r.entries.filter(function(e){ return !e.present; }).map(function(e){ return e.name; });
+      return '<details class="rec"><summary><span class="who">' + esc(r.groupName) + '<small>' + esc(stamp(r.at)) + '</small></span>' +
+        '<span class="rec-score">' + yes.length + '<small>/' + r.entries.length + '</small></span><span class="chev">' + ICON.chev + '</span></summary>' +
+        '<div class="rec-body"><h3 class="ok">Presenti · ' + yes.length + '</h3><p class="names">' + (yes.length ? esc(yes.join(', ')) : 'Nessuno') + '</p>' +
+        '<h3 class="no">Assenti · ' + no.length + '</h3><p class="names">' + (no.length ? esc(no.join(', ')) : 'Nessuno') + '</p></div></details>';
+    }).join('') + '</div>';
+  }
+  app.innerHTML = header('Registro', 'Appelli salvati') + '<div class="screen">' + body + '</div>';
+};
+
+/* ---------- account e backup ---------- */
+VIEWS.backup = function(){
+  var cloud = !!store && store.mode === 'cloud';
+  var intro, account = '';
+  if(cloud){
+    intro = '<p class="lead">I tuoi dati sono salvati online nel tuo account.</p><p class="sub">' +
+      (acct.name ? 'Collegato come ' + esc(acct.name) + '. ' : '') +
+      'Ogni modifica si salva da sola e la ritrovi aprendo il sito da qualsiasi dispositivo con la stessa email e password. Solo tu puoi vedere i tuoi dati.</p>';
+    account = '<h2 class="h2">Account</h2><div class="panel"><p>Esci da questo dispositivo. I dati restano salvati online.</p>' +
+      '<button class="btn btn-quiet btn-block" type="button" data-act="logout">Esci dall’account</button></div>';
+  } else {
+    intro = '<p class="lead">L’accesso con account non è ancora attivo.</p><p class="sub">I dati restano nella memoria di questo browser e possono sparire se Safari li cancella. Per attivare l’accesso con email e password segui la guida (file README) e incolla i dati di Firebase all’inizio di index.html. Intanto puoi fare un backup qui sotto.</p>';
+  }
+  app.innerHTML = header('Dati', 'Account e backup') +
+    '<div class="screen">' + intro +
+    '<h2 class="h2">Salva una copia</h2><div class="panel"><p>Gruppi, persone e appelli in un unico file, da tenere al sicuro.</p><div class="stack-s">' +
+    '<button class="btn btn-primary btn-block" type="button" data-act="dl-backup">Scarica backup</button>' +
+    '<button class="btn btn-quiet btn-block" type="button" data-act="copy-backup">Copia backup</button></div></div>' +
+    '<h2 class="h2">Ripristina</h2><div class="panel"><p>Il backup si aggiunge ai dati che hai già e non cancella nulla.</p>' +
+    '<label class="btn btn-quiet btn-block" for="backupFile">Scegli un file di backup</label>' +
+    '<input class="sr" type="file" id="backupFile" accept=".json,application/json">' +
+    '<label class="label" for="backupBox" style="display:block;margin:16px 0 8px">Oppure incolla qui il testo del backup</label>' +
+    '<textarea class="input textarea" id="backupBox" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>' +
+    '<button class="btn btn-primary btn-block" type="button" data-act="restore-text" style="margin-top:10px">Ripristina dal testo</button>' +
+    '<p class="msg" id="restoreMsg" role="status"></p></div>' + account + '</div>';
+};
+function backupText(){
+  return JSON.stringify({ app:'registro-presenze', v:1, exportedAt:new Date().toISOString(), groups:state.groups, records:state.records }, null, 1);
+}
+function dlBackup(){
+  var name = 'registro-presenze-' + new Date().toISOString().slice(0, 10) + '.json';
+  try{
+    var blob = new Blob([backupText()], { type:'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 30000);
+    toast('Backup pronto.');
+  }catch(e){
+    toast('Non riesco a scaricare il file. Prova con “Copia backup”.');
+  }
+}
+function copyBackup(){
+  var txt = backupText();
+  var box = document.getElementById('backupBox');
+  var fallback = function(){ if(box){ box.value = txt; box.focus(); box.select(); } toast('Seleziona il testo qui sotto e copialo.'); };
+  try{
+    navigator.clipboard.writeText(txt).then(function(){ toast('Backup copiato. Incollalo in una nota per conservarlo.'); }, fallback);
+  }catch(e){ fallback(); }
+}
+function restoreNote(text, isErr){
+  var m = document.getElementById('restoreMsg');
+  if(m){ m.className = 'msg ' + (isErr ? 'err' : 'good'); m.textContent = text; }
+}
+var ID_OK = /^[A-Za-z0-9_-]{1,64}$/;
+function restoreFrom(text){
+  var d;
+  try{ d = JSON.parse(String(text || '').trim()); }catch(e){ restoreNote('Il testo non è un backup valido.', true); return; }
+  if(!d || d.app !== 'registro-presenze' || !Array.isArray(d.groups) || !Array.isArray(d.records)){ restoreNote('Questo non sembra un backup di Registro presenze.', true); return; }
+  var addG = 0, addP = 0, newRecs = [];
+  d.groups.forEach(function(bg){
+    if(!bg || !ID_OK.test(String(bg.id)) || typeof bg.name !== 'string' || !Array.isArray(bg.members)) return;
+    var g = state.groups.filter(function(x){ return x.id === bg.id; })[0];
+    if(!g){ g = { id: bg.id, name: clean(bg.name).slice(0, 60), members: [] }; state.groups.push(g); addG++; }
+    bg.members.forEach(function(bm){
+      if(bm && ID_OK.test(String(bm.id)) && typeof bm.name === 'string' && !g.members.some(function(x){ return x.id === bm.id; })){
+        g.members.push({ id: bm.id, name: clean(bm.name).slice(0, 80) }); addP++;
+      }
+    });
+  });
+  d.records.forEach(function(r){
+    if(r && ID_OK.test(String(r.id)) && typeof r.at === 'string' && Array.isArray(r.entries) && !state.records.some(function(x){ return x.id === r.id; })){
+      var rec = {
+        id: r.id, groupId: String(r.groupId || ''), groupName: clean(r.groupName).slice(0, 60), at: r.at,
+        entries: r.entries.filter(function(e){ return e && typeof e.name === 'string'; }).map(function(e){ return { name: clean(e.name).slice(0, 80), present: e.present === true }; })
+      };
+      state.records.push(rec); newRecs.push(rec);
+    }
+  });
+  state.records.sort(function(a, b){ return a.at < b.at ? 1 : -1; });
+  if(!addG && !addP && !newRecs.length){ restoreNote('Il backup non contiene nulla di nuovo: i tuoi dati sono già completi.', false); return; }
+  flushGroups();
+  var chain = Promise.resolve();
+  newRecs.forEach(function(rec){ chain = chain.then(function(){ return store.saveRecord(rec); }); });
+  chain.then(function(){
+    restoreNote('Ripristinato: ' + plural(addG, 'gruppo', 'gruppi') + ', ' + plural(addP, 'persona', 'persone') + ', ' + plural(newRecs.length, 'appello', 'appelli') + '.', false);
+  }, function(){
+    restoreNote('Ripristino incompleto: alcuni appelli non sono stati salvati. Riprova.', true);
+  });
+}
+
+/* ---------- eventi ---------- */
+app.addEventListener('click', function(e){
+  var el = e.target.closest('[data-act]');
+  if(!el) return;
+  var act = el.dataset.act, id = el.dataset.id;
+  if(act === 'home'){ leaveTo('home'); }
+  else if(act === 'add'){ go('nuovo-gruppo'); }
+  else if(act === 'call'){ go('scegli-gruppo'); }
+  else if(act === 'history'){ go('storico'); }
+  else if(act === 'open-group'){ cur.groupId = id; cur.flash = ''; go('membri'); }
+  else if(act === 'start-call'){ startCall(id); }
+  else if(act === 'cancel-name'){
+    var i = document.getElementById('memberName'), m = document.getElementById('memberMsg');
+    i.value = ''; m.className = 'msg'; m.textContent = ''; i.focus();
+  }
+  else if(act === 'remove-member'){
+    var g = findGroup(); if(!g) return;
+    var mem = g.members.filter(function(x){ return x.id === id; })[0]; if(!mem) return;
+    askConfirm({ title:'Rimuovere ' + mem.name + '?', text:'La persona esce dal gruppo. Gli appelli già salvati non cambiano.', yes:'Rimuovi', danger:true, onYes:function(){
+      g.members = g.members.filter(function(x){ return x.id !== id; });
+      flushGroups(); paintMembers();
+    }});
+  }
+  else if(act === 'delete-group'){
+    var gg = findGroup(); if(!gg) return;
+    askConfirm({ title:'Eliminare “' + gg.name + '”?', text:'Il gruppo e i suoi nomi vengono cancellati. Gli appelli già salvati restano nello storico.', yes:'Elimina gruppo', danger:true, onYes:function(){
+      state.groups = state.groups.filter(function(x){ return x.id !== gg.id; });
+      flushGroups(); cur.groupId = null; toast('Gruppo eliminato.'); go('home');
+    }});
+  }
+  else if(act === 'mark'){
+    if(!cur.marks) return;
+    var v = el.dataset.v === '1';
+    if(cur.marks[id] === v){ delete cur.marks[id]; } else { cur.marks[id] = v; }
+    paintCall();
+  }
+  else if(act === 'all-present'){
+    var gr = findGroup(); if(!gr || !cur.marks) return;
+    gr.members.forEach(function(x){ cur.marks[x.id] = true; });
+    paintCall();
+  }
+  else if(act === 'confirm-call'){ confirmCall(); }
+  else if(act === 'account'){ go('backup'); }
+  else if(act === 'dl-backup'){ dlBackup(); }
+  else if(act === 'copy-backup'){ copyBackup(); }
+  else if(act === 'restore-text'){ restoreFrom(document.getElementById('backupBox').value); }
+  else if(act === 'auth-mode'){
+    var ei = document.getElementById('authEmail'); if(ei) cur.authEmail = clean(ei.value);
+    cur.authMode = el.dataset.v === 'signup' ? 'signup' : 'login';
+    paint();
+  }
+  else if(act === 'toggle-pw'){
+    var pi = document.getElementById('authPass'); if(!pi) return;
+    var show = pi.type === 'password';
+    pi.type = show ? 'text' : 'password';
+    el.textContent = show ? 'Nascondi' : 'Mostra';
+    el.setAttribute('aria-pressed', show ? 'true' : 'false');
+    pi.focus();
+  }
+  else if(act === 'auth-forgot'){ forgotPassword(); }
+  else if(act === 'social'){ socialLogin(el.dataset.v); }
+  else if(act === 'logout'){ askLogout(); }
+  else if(act === 'logout-now'){ doLogout(); }
+  else if(act === 'retry'){ if(retryFn){ retryFn(); } else { location.reload(); } }
+});
+app.addEventListener('change', function(e){
+  var t = e.target;
+  if(t && t.id === 'backupFile' && t.files && t.files[0]){
+    var rd = new FileReader();
+    rd.onload = function(){ restoreFrom(String(rd.result || '')); };
+    rd.onerror = function(){ restoreNote('Non riesco a leggere il file.', true); };
+    rd.readAsText(t.files[0]);
+    t.value = '';
+  }
+});
+app.addEventListener('submit', function(e){
+  e.preventDefault();
+  var f = e.target;
+  if(f.id === 'formGroup'){ createGroup(f.elements.groupName.value); }
+  else if(f.id === 'formMember'){ addMember(f.elements.memberName.value); }
+  else if(f.id === 'formAuth'){ submitAuth(f.elements.email.value, f.elements.password.value); }
+});
+
+/* ---------- avvio ---------- */
+function startLocal(){
+  store = localStore; state = readLocal(); ready = true;
+  try{ if(navigator.storage && navigator.storage.persist){ navigator.storage.persist(); } }catch(e){}
+  go('home', true);
+}
+function sdkProblem(title, text){
+  cur.error = { title: title, text: text, logout: false };
+  retryFn = null;
+  ready = true;
+  go('errore', true);
+}
+function boot(){
+  if(!CONFIGURED){ startLocal(); return; }
+  if(!(window.firebase && firebase.auth && firebase.firestore)){
+    sdkProblem('Non riesco a collegarmi', 'Il servizio di accesso non si è caricato. Controlla la connessione a internet e riprova.');
+    return;
+  }
+  showLoading('Carico…');
+  try{
+    firebase.initializeApp(window.FIREBASE_CONFIG);
+    auth = firebase.auth();
+    auth.languageCode = 'it';
+    db = firebase.firestore();
+  }catch(e){
+    sdkProblem('Configurazione non valida', 'I dati di Firebase in index.html non sono corretti. Controlla il passo B della guida.');
+    return;
+  }
+  /* memoria del dispositivo: permette di lavorare anche con poca o nessuna connessione */
+  var persist;
+  try{
+    persist = Promise.race([
+      db.enablePersistence({ synchronizeTabs:true }).then(function(){ persistOk = true; }),
+      sleep(4000)
+    ]).catch(function(){ persistOk = false; });
+  }catch(e){ persist = Promise.resolve(); }
+  persist.then(function(){
+    auth.onAuthStateChanged(onUser, function(){
+      sdkProblem('Non riesco a collegarmi', 'Il servizio di accesso non risponde. Controlla la connessione a internet e riprova.');
+    });
+  });
+}
+boot();
+})();
+</script>
+
+</body>
+</html>
