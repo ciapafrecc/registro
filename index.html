@@ -921,7 +921,9 @@ VIEWS.appello = function(){
   var g = findGroup();
   if(!g || !cur.marks){ go('home'); return; }
   app.innerHTML = header('Appello · ' + fmtDay.format(new Date()), g.name) +
-    '<div class="screen"><div class="tally" id="tally"></div>' +
+       '<div class="screen"><div class="field" style="margin-bottom:16px"><label class="label" for="callTitle">Nome dell’appello (facoltativo)</label>' +
+    '<input class="input" id="callTitle" type="text" maxlength="80" autocomplete="off" autocapitalize="sentences" enterkeyhint="done" placeholder="Es. Lezione 12, Prova generale"></div>' +
+    '<div class="tally" id="tally"></div>' +
     '<div class="tools"><button class="link-btn" type="button" data-act="all-present">Segna tutti presenti</button></div>' +
     '<ol class="list" id="callList">' + g.members.map(function(m, i){
       return '<li class="row call-row" data-id="' + m.id + '"><span class="num">' + (i + 1) + '</span><span class="who">' + esc(m.name) + '</span>' +
@@ -975,6 +977,8 @@ function confirmCall(){
     entries: g.members.map(function(m){ return { name: m.name, present: cur.marks[m.id] === true }; })
   };
   var btn = document.getElementById('btnConfirm');
+     var title = clean(document.getElementById('callTitle').value).slice(0, 80);
+  if(title) rec.title = title;
   btn.disabled = true; btn.textContent = 'Salvo…';
   msg.className = 'msg'; msg.textContent = '';
   state.records.unshift(rec);
@@ -1003,7 +1007,7 @@ VIEWS.fatto = function(){
   var no = r.entries.filter(function(e){ return !e.present; });
   var absent = no.length ? '<h2 class="h2">Assenti</h2><p class="names">' + esc(no.map(function(e){ return e.name; }).join(', ')) + '</p>' : '<p class="msg good" style="margin-top:18px">Nessuna assenza.</p>';
   app.innerHTML = header('', 'Appello') +
-    '<div class="screen"><div class="done"><span class="done-ico">' + ICON.check + '</span><h2>Appello salvato</h2><p>' + esc(r.groupName) + ' · ' + esc(stamp(r.at)) + '</p></div>' +
+       '<div class="screen"><div class="done"><span class="done-ico">' + ICON.check + '</span><h2>Appello salvato</h2><p>' + (r.title ? esc(r.title) + ' · ' : '') + esc(r.groupName) + ' · ' + esc(stamp(r.at)) + '</p></div>' +
     '<div class="tally" style="margin-top:18px"><span class="chip chip--ok"><b>' + yes.length + '</b> presenti</span><span class="chip chip--no"><b>' + no.length + '</b> assenti</span></div>' +
     absent +
     '<div class="stack-s" style="margin-top:28px"><button class="btn btn-primary btn-block" type="button" data-act="home">' + ICON.house + ' Torna alla home</button>' +
@@ -1020,7 +1024,7 @@ VIEWS.storico = function(){
     body = '<div class="stack-s">' + state.records.map(function(r){
       var yes = r.entries.filter(function(e){ return e.present; }).map(function(e){ return e.name; });
       var no = r.entries.filter(function(e){ return !e.present; }).map(function(e){ return e.name; });
-      return '<details class="rec"><summary><span class="who">' + esc(r.groupName) + '<small>' + esc(stamp(r.at)) + '</small></span>' +
+            return '<details class="rec"><summary><span class="who">' + esc(r.title || r.groupName) + '<small>' + (r.title ? esc(r.groupName) + ' · ' : '') + esc(stamp(r.at)) + '</small></span>' +
         '<span class="rec-score">' + yes.length + '<small>/' + r.entries.length + '</small></span><span class="chev">' + ICON.chev + '</span></summary>' +
         '<div class="rec-body"><h3 class="ok">Presenti · ' + yes.length + '</h3><p class="names">' + (yes.length ? esc(yes.join(', ')) : 'Nessuno') + '</p>' +
         '<h3 class="no">Assenti · ' + no.length + '</h3><p class="names">' + (no.length ? esc(no.join(', ')) : 'Nessuno') + '</p></div></details>';
@@ -1106,7 +1110,9 @@ function restoreFrom(text){
         id: r.id, groupId: String(r.groupId || ''), groupName: clean(r.groupName).slice(0, 60), at: r.at,
         entries: r.entries.filter(function(e){ return e && typeof e.name === 'string'; }).map(function(e){ return { name: clean(e.name).slice(0, 80), present: e.present === true }; })
       };
+            if(typeof r.title === 'string' && clean(r.title)) rec.title = clean(r.title).slice(0, 80);
       state.records.push(rec); newRecs.push(rec);
+
     }
   });
   state.records.sort(function(a, b){ return a.at < b.at ? 1 : -1; });
