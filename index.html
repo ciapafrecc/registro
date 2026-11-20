@@ -402,7 +402,7 @@ var LOGO_APPLE = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentC
 function isConfigured(c){
   return !!c && ['apiKey','projectId'].every(function(k){ return c[k] && String(c[k]).indexOf('INCOLLA') === -1; });
 }
-var CONFIGURED = isConfigured(window.FIREBASE_CONFIG);
+var CONFIGURED = isConfigured(firebaseConfig);
 
 var LS_KEY = 'registro-presenze-v1';          // usato solo se Firebase non è configurato
 var state = { groups: [], records: [] };
